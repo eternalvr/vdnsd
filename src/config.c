@@ -29,17 +29,17 @@ inline char *config_get_string(int config_type) {
 
 char *_config_find_file()
 {
-    if(access("~/.vdns.conf", F_OK) != -1) {
+    if(access("~/.vdnsd.conf", F_OK) != -1) {
 
-        return "~/.vdns.conf";
+        return "~/.vdnsd.conf";
     }
-    if(access("./vdns.conf", F_OK) != -1) {
+    if(access("./vdnsd.conf", F_OK) != -1) {
 
-        return "./vdns.conf";
+        return "./vdnsd.conf";
     }
-    if(access("/etc/vdns.conf", F_OK) != -1){
+    if(access("/etc/vdnsd/vdnsd.conf", F_OK) != -1){
 
-        return "/etc/vdns.conf";
+        return "/etc/vdnsd/vdnsd.conf";
     }
     return NULL;
 }
