@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(vdns)
+project(vdnsd)
 FIND_PACKAGE ( Threads REQUIRED )
 
 find_library(LIBEV_LIBRARY NAMES ev)
@@ -13,11 +13,14 @@ add_definitions( "-D_DEBUG" )
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 #add_subdirectory(src/udns)
 
-add_executable(vdns src/main.c src/dns.c src/thpool.c src/dnsworker.c src/redis.c src/dns_cache.c src/import.c src/config.c src/logger.c src/pid.c src/pid.h)
+add_executable(vdnsd src/main.c src/dns.c src/thpool.c src/dnsworker.c src/redis.c src/dns_cache.c src/import.c src/config.c src/logger.c src/pid.c src/pid.h)
 
 
 #target_link_libraries(vdns udns)
-target_link_libraries(vdns ev)
-target_link_libraries(vdns pthread)
-target_link_libraries(vdns eredis)
-target_link_libraries(vdns resolv)
+target_link_libraries(vdnsd ev)
+target_link_libraries(vdnsd pthread)
+target_link_libraries(vdnsd eredis)
+target_link_libraries(vdnsd resolv)
+
+install(TARGETS vdnsd DESTINATION bin COMPONENT binaries)
+install(FILES vdns.conf DESTINATION etc/vdnsd COMPONENT config)
