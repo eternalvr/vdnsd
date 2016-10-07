@@ -27,6 +27,7 @@
 #include "config.h"
 #include "logger.h"
 #include "pid.h"
+#include "qps_counter.h"
 
 #define MAX_LISTEN_IPS 5
 
@@ -37,3 +38,4 @@ struct server_t {
 void usage();
 void recv_string(struct ev_loop *loop, struct ev_io *watcher, int revents);
 static void stats_cb (struct ev_loop *loop, ev_periodic *w, int revents);
+static void qps_cb (struct ev_loop *loop, ev_periodic *w, int revents);

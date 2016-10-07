@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
     int reset_on_start = 0;
     char *logfile = "vdns.log";
 
+
     ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
     ev_signal_start(loop, &signal_watcher);
 
@@ -249,7 +250,9 @@ int main(int argc, char *argv[]) {
     ev_periodic_init (&tick, stats_cb, 0., 10., 0);
     ev_periodic_start (loop, &tick);
 
-
+    ev_periodic qps_timer;
+    ev_periodic_init( &qps_timer, qps_cb, 0., 1., 0);
+    ev_periodic_start(loop, &qps_timer);
 
 
     L_INFO("Server is ready PID: %d Threads: %d", getpid(), config_get_int(CONFIG_NUM_THREADS));
@@ -288,13 +291,18 @@ void recv_string(struct ev_loop *loop, struct ev_io *watcher, int revents) {
 
     DnsWorker *dworker = worker_create(1, dns, read, watcher->fd,
                                        (struct sockaddr *) sender, sendsize, loop);
+    qps_add_query();
     thpool_add_work(thpool, (void *) worker_thread, (void *) dworker);
 }
 
 void usage() {
     printf("Usage: vdns [-t threads] [-p port] [-c configfile] [-i blockfile] [-r] [-d] [-F]\n");
 }
-
+static void qps_cb (struct ev_loop *loop, ev_periodic *w, int revents){
+    qps_tick();
+}
 static void stats_cb (struct ev_loop *loop, ev_periodic *w, int revents){
-    L_INFO("ThreadPool Stats %d alive %d working", thpool->num_threads_alive, thpool->num_threads_working);
+    char *qps_str = qps_load_str();
+    L_INFO("[STATS] Threads %d/%d QPS %s", thpool->num_threads_alive, thpool->num_threads_working, qps_str);
+    free(qps_str);
 }

@@ -13,7 +13,7 @@ add_definitions( "-D_DEBUG" )
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 #add_subdirectory(src/udns)
 
-add_executable(vdnsd src/main.c src/dns.c src/thpool.c src/dnsworker.c src/redis.c src/dns_cache.c src/import.c src/config.c src/logger.c src/pid.c src/pid.h)
+add_executable(vdnsd src/main.c src/dns.c src/thpool.c src/dnsworker.c src/redis.c src/dns_cache.c src/import.c src/config.c src/logger.c src/pid.c src/pid.h src/qps_counter.c src/qps_counter.h)
 
 
 #target_link_libraries(vdns udns)
