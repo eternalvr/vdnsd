@@ -1,7 +1,9 @@
 #include "dns.h"
+#include "dnsworker.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/time.h>
+
 
 extern eredis_t *redis;
 
@@ -17,13 +19,28 @@ void dns_request_free(struct dns_request *dns) {
 void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
     struct addrinfo *host, *p;
     struct sockaddr_storage *h = NULL;
-    char *ip;
+    char *ip = NULL;
     struct dns_ctx *dns_context = NULL;
     struct timeval tval_before, tval_after, tval_result;
     gettimeofday(&tval_before, NULL);
 
     char *typeName = dns_cltos(type);
-
+    switch(worker->sender->sa_family) {
+        case AF_INET: {
+            struct sockaddr_in *addr_in = (struct sockaddr_in *)worker->sender;
+            ip = malloc(INET_ADDRSTRLEN);
+            inet_ntop(AF_INET, &(addr_in->sin_addr), ip, INET_ADDRSTRLEN);
+            break;
+        }
+        case AF_INET6: {
+            struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *)worker->sender;
+            ip = malloc(INET6_ADDRSTRLEN);
+            inet_ntop(AF_INET6, &(addr_in6->sin6_addr), ip, INET6_ADDRSTRLEN);
+            break;
+        }
+        default:
+            break;
+    }
 
 
     int i;
@@ -35,7 +52,7 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
        dns_response_send(dns->fd, dns_response);
        gettimeofday(&tval_after, NULL);
        timersub(&tval_after, &tval_before, &tval_result);
-       L_DEBUG("[CACHED]: %s %s (%ld.%06ld s)", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+       L_DEBUG("[CACHED]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
        dns_response_destroy(dns_response);
 
        dns_request_free(dns);
@@ -102,7 +119,7 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
                 }
             }
         } else {
-            L_DEBUG("[NCACHE]: %s %s (%ld.%06ld s)", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+            L_DEBUG("[NCACHE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
         }
         dns_cache_save(negCache, typeName, dns->hostname, hdr->rcode);
     }
@@ -117,9 +134,11 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
 
-    L_DEBUG("[RESOLVE]: %s %s (%ld.%06ld s)", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+    L_DEBUG("[RESOLVE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
     dns_response_destroy(dns_response);
     dns_request_free(dns);
+    free(ip);
+    ip = NULL;
 }
 int dns_find_cached_entry(struct dns_request *dns, int type, struct dns_response_t *dns_response, dns_rrtype_t answer_type)
 {

@@ -53,11 +53,11 @@ void logger_log(int loglevel, char *format, ...) {
     t_time = time(NULL);
     struct tm *ltime = localtime(&t_time);
 
-    int len = strftime(&buffer[bufferPos], 4096, "[%F %T]", ltime);
+    int len = strftime(&buffer[bufferPos], 4096, "[%F %T] ", ltime);
     bufferPos+=len;
 
-    len = snprintf(&buffer[bufferPos], sizeof(buffer)-bufferPos, "[#%ld] ", pthread_self ());
-    bufferPos+=len;
+    /*len = snprintf(&buffer[bufferPos], sizeof(buffer)-bufferPos, "[#%ld] ", (pthread_self ()) );
+    bufferPos+=len;*/
 
     len = vsnprintf(&buffer[bufferPos],sizeof(buffer)-bufferPos, format, val);
 
