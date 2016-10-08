@@ -139,11 +139,11 @@ int _config_read_configfile( char *configfile )
                     continue;
                 }
                 if(strncasecmp(key, "captive_ipv6", strlen(key))==0){
-                    config_set_string(CONFIG_CAPTIVE_IPV4, value);
+                    config_set_string(CONFIG_CAPTIVE_IPV6, value);
                     continue;
                 }
                 if(strncasecmp(key, "adspoof_ipv6", strlen(key))==0){
-                    config_set_string(CONFIG_ADSPOOF_IPV4, value);
+                    config_set_string(CONFIG_ADSPOOF_IPV6, value);
                     continue;
                 }
                 if(strncasecmp(key, "log_queries", strlen(key))==0){

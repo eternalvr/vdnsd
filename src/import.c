@@ -77,7 +77,7 @@ void import_file( char *filename )
         cachebin = dns_cache_serialize(dns_cache6, iLen);
         eredis_r_append_cmd(r, "SET h%s:%s %b", "AAAA", line, cachebin, *iLen);
         eredis_reply_t *reply6 = eredis_r_reply(r);
-        
+
         free(cachebin);
         cachebin = NULL;
         dns_cache_free(dns_cache);
