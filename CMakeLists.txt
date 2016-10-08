@@ -23,4 +23,4 @@ target_link_libraries(vdnsd eredis)
 target_link_libraries(vdnsd resolv)
 
 install(TARGETS vdnsd DESTINATION bin COMPONENT binaries)
-install(FILES vdnsd.conf DESTINATION etc/vdnsd COMPONENT config)
+install(FILES vdnsd.conf.example DESTINATION etc/vdnsd COMPONENT config)
