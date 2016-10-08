@@ -1,5 +1,6 @@
 #include "dns.h"
-#include "dnsworker.h"
+#include "config.h"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/time.h>
@@ -25,6 +26,7 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
     gettimeofday(&tval_before, NULL);
 
     char *typeName = dns_cltos(type);
+
     switch(worker->sender->sa_family) {
         case AF_INET: {
             struct sockaddr_in *addr_in = (struct sockaddr_in *)worker->sender;
@@ -52,7 +54,11 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
        dns_response_send(dns->fd, dns_response);
        gettimeofday(&tval_after, NULL);
        timersub(&tval_after, &tval_before, &tval_result);
-       L_DEBUG("[CACHED]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
+
+       if(config_get_int(CONFIG_LOG_QUERIES)){
+           L_DEBUG("[CACHED]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
+       }
+
        dns_response_destroy(dns_response);
 
        dns_request_free(dns);
@@ -119,7 +125,10 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
                 }
             }
         } else {
-            L_DEBUG("[NCACHE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
+            if(config_get_int(CONFIG_LOG_QUERIES)) {
+                L_DEBUG("[NCACHE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
+            }
+
         }
         dns_cache_save(negCache, typeName, dns->hostname, hdr->rcode);
     }
@@ -134,7 +143,11 @@ void dns_parse_request(struct dns_request *dns, int type, DnsWorker *worker) {
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
 
-    L_DEBUG("[RESOLVE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, ip);
+    if(config_get_int(CONFIG_LOG_QUERIES)) {
+        L_DEBUG("[RESOLVE]: %s %s (%ld.%06ld s) from %s", typeName, dns->hostname, (long int) tval_result.tv_sec,
+                (long int) tval_result.tv_usec, ip);
+    }
+
     dns_response_destroy(dns_response);
     dns_request_free(dns);
     free(ip);

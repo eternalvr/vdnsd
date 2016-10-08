@@ -17,6 +17,11 @@ void config_initialize()
     __config.configfile = 0;
     __config.logfile = 0;
     __config.pidfile = "vdns.pid";
+    __config.log_queries=0;
+    __config.adspoof_ipv4 = "0.0.0.0";
+    __config.adspoof_ipv6 = "::1";
+    __config.captive_ipv4 = "0.0.0.0";
+    __config.captive_ipv6 = "::1";
 }
 
 inline int config_get_int(int config_type){
@@ -125,6 +130,26 @@ int _config_read_configfile( char *configfile )
                     config_set_string(CONFIG_PIDFILE, value);
                     continue;
                 }
+                if(strncasecmp(key, "captive_ipv4", strlen(key))==0){
+                    config_set_string(CONFIG_CAPTIVE_IPV4, value);
+                    continue;
+                }
+                if(strncasecmp(key, "adspoof_ipv4", strlen(key))==0){
+                    config_set_string(CONFIG_ADSPOOF_IPV4, value);
+                    continue;
+                }
+                if(strncasecmp(key, "captive_ipv6", strlen(key))==0){
+                    config_set_string(CONFIG_CAPTIVE_IPV4, value);
+                    continue;
+                }
+                if(strncasecmp(key, "adspoof_ipv6", strlen(key))==0){
+                    config_set_string(CONFIG_ADSPOOF_IPV4, value);
+                    continue;
+                }
+                if(strncasecmp(key, "log_queries", strlen(key))==0){
+                    config_set_int(CONFIG_LOG_QUERIES, atoi(value));
+                    continue;
+                }
                 printf("Warning: unknown key found in config_file: %s", key);
 
             }
@@ -163,6 +188,8 @@ void *config_get_variable(int config_type)
         case CONFIG_RESET_ON_START: return &__config.reset_on_start;
         case CONFIG_IMPORT_ON_START: return &__config.import_on_start;
         case CONFIG_REDIS_PORT: return &__config.redis_port;
+        case CONFIG_LOG_QUERIES: return &__config.log_queries;
+
 
 
 
@@ -175,6 +202,10 @@ void *config_get_variable(int config_type)
         case CONFIG_EUSER: return &__config.euser;
         case CONFIG_EGRP: return &__config.egrp;
         case CONFIG_PIDFILE: return &__config.pidfile;
+        case CONFIG_CAPTIVE_IPV4: return &__config.captive_ipv4;
+        case CONFIG_ADSPOOF_IPV4: return &__config.adspoof_ipv4;
+        case CONFIG_CAPTIVE_IPV6: return &__config.captive_ipv6;
+        case CONFIG_ADSPOOF_IPV6: return &__config.adspoof_ipv6;
 
         default:
             return 0;
@@ -183,7 +214,7 @@ void *config_get_variable(int config_type)
 void config_dump()
 {
     printf("configuration:\n");
-    printf("  running as user %s in group %s", __config.euser, __config.egrp);
+    printf("  running as user %s in group %s\n", __config.euser, __config.egrp);
     printf("  configfile: %s\n", __config.configfile);
     printf("  pidfile: %s\n", __config.pidfile);
     printf("  logfile: %s\n", __config.logfile);
@@ -196,6 +227,7 @@ void config_dump()
     printf("   - Reset on Start: %d\n", __config.reset_on_start);
     printf("  Import on Start: %d\n", __config.import_on_start);
     printf("  Daemonize: %d\n", __config.daemonize);
+    printf("  log_queries: %d\n", __config.log_queries);
 }
 void config_free()
 {

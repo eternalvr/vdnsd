@@ -19,6 +19,12 @@ struct config_t {
     char *euser;
     char *egrp;
     char *pidfile;
+    int log_queries;
+    char *captive_ipv4;
+    char *captive_ipv6;
+    char *adspoof_ipv4;
+    char *adspoof_ipv6;
+
 
 };
 
@@ -35,6 +41,11 @@ struct config_t {
 #define CONFIG_EUSER                0x10
 #define CONFIG_EGRP                 0x11
 #define CONFIG_PIDFILE              0x12
+#define CONFIG_LOG_QUERIES          0x13
+#define CONFIG_CAPTIVE_IPV4           0x14
+#define CONFIG_ADSPOOF_IPV4           0x15
+#define CONFIG_CAPTIVE_IPV6           0x16
+#define CONFIG_ADSPOOF_IPV6           0x17
 
 void config_initialize();
 void *config_get_variable(int config_type);
