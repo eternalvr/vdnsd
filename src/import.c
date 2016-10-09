@@ -17,6 +17,7 @@ void import_file( char *filename )
     FILE *fp;
     char line[MAX_LINE_LENGTH];
     char *cachebin;
+    int use_adspoof_ip = 0;
 
     eredis_reader_t *r;
 
@@ -57,13 +58,24 @@ void import_file( char *filename )
         }
 
         line[strcspn(line, "\n")] = 0; // remove newline at the end
+        if(line[0] == '!'){
+            use_adspoof_ip = 1;
+            memmove(line, line+1, strlen(line));
+        } else {
+            use_adspoof_ip = 0;
+        }
 
         memset(iLen, 0, sizeof(int));
 
 
+
         // create A RECORD
         struct dns_cache_result_t *dns_cache = dns_cache_create();
-        dns_cache_add_entry(dns_cache, DNS_TYPE_A, 65535, bin_ipv4, IPV4LENGTH);
+        if(use_adspoof_ip) {
+            dns_cache_add_entry(dns_cache, DNS_TYPE_A, 65535, bin_ipv4, IPV4LENGTH);
+        } else {
+            dns_cache_add_entry(dns_cache, DNS_TYPE_A, 65535, ipv4data, IPV4LENGTH);
+        }
         cachebin = dns_cache_serialize(dns_cache, iLen);
         eredis_r_append_cmd(r, "SET h%s:%s %b", "A", line, cachebin, *iLen);
         eredis_reply_t *reply = eredis_r_reply(r);
@@ -73,7 +85,11 @@ void import_file( char *filename )
 
         // create AAAA RECORD
         struct dns_cache_result_t *dns_cache6 = dns_cache_create();
-        dns_cache_add_entry(dns_cache6, DNS_TYPE_AAAA, 65535, bin_ipv6, IPV6LENGTH);
+        if(use_adspoof_ip) {
+            dns_cache_add_entry(dns_cache6, DNS_TYPE_AAAA, 65535, bin_ipv6, IPV6LENGTH);
+        } else {
+            dns_cache_add_entry(dns_cache6, DNS_TYPE_AAAA, 65535, ipv6data, IPV6LENGTH);
+        }
         cachebin = dns_cache_serialize(dns_cache6, iLen);
         eredis_r_append_cmd(r, "SET h%s:%s %b", "AAAA", line, cachebin, *iLen);
         eredis_reply_t *reply6 = eredis_r_reply(r);
