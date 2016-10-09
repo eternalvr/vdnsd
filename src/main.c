@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
                 break;
             case 'i':
                 config_set_string(CONFIG_IMPORTFILE, optarg);
+                config_set_int(CONFIG_IMPORT_ON_START, 1);
                 break;
             case 'r':
                 config_set_int(CONFIG_RESET_ON_START, 1);
@@ -151,6 +152,7 @@ int main(int argc, char *argv[]) {
     if (config_get_int(CONFIG_IMPORT_ON_START)) {
         printf("Importing blocklist from: %s\n", config_get_string(CONFIG_IMPORTFILE));
         import_file(config_get_string(CONFIG_IMPORTFILE));
+        printf("Done.Exit.");
         exit(EXIT_SUCCESS);
     }
 
