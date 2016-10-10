@@ -40,7 +40,7 @@ void dns_cache_add_entry(struct dns_cache_result_t *res, uint8_t type, uint16_t 
 }
 
 char *dns_cache_serialize(struct dns_cache_result_t *res, int *l) {
-    char *t = malloc(sizeof(char) * 256);
+    char *t = malloc(sizeof(char) * 1024);
     char *tStart = t;
 
     t[0] = res->numEntries;
